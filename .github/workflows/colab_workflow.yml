@@ -1,0 +1,27 @@
+name: Colab Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: pip install -q pyhive sqlalchemy
+
+    - name: Set up Colab environment
+      run: |
+        pip install jupyter_http_over_ws
+        jupyter serverextension enable --py jupyter_http_over_ws
+        jupyter notebook --NotebookApp.allow_origin='https://colab.research.google.com' --port=8888 --NotebookApp.token='' --NotebookApp.disable_check_xsrf=True &
+        sleep 5
+
+    - name: Execute notebook
+      run: jupyter nbconvert --execute PySpark.ipynb
